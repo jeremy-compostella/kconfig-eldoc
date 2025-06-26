@@ -1,0 +1,28 @@
+An Emacs package that provides =eldoc= integration for Kconfig symbols in C code.
+* Description
+=kconfig-eldoc= enhances your C code editing experience by displaying the value of Kconfig symbols (defined in your project's =.config= file) directly in the Emacs minibuffer as you type. This gives you immediate feedback on your project's configuration options.
+
+[[screenshot.png]]
+* Features
+-   *Real-time Kconfig Value Display:*  See the value of Kconfig symbols as you place your cursor on them.
+-   *Automatic Activation:* Integrates seamlessly with =c-mode= and =eldoc= for automatic activation in C buffers.
+-   *Git Repository Aware:* Locates the =.config= file at the root of your Git repository using =magit=.
+-   *Handles "is not set":*  Interprets "is not set" as "n" for boolean Kconfig symbols.
+* Requirements
+-   Emacs 29.4 or later
+-   Magit 3.3.0 or later
+* Installation
+1.  Copy =kconfig-eldoc.el= to a directory in your =load-path=. For example, =~/.emacs.d/elpa/kconfig-eldoc/=.
+2.  Add the following to your Emacs configuration file (e.g., =~/.emacs= or =~/.emacs.d/init.el=):
+    #+begin_src emacs-lisp
+    (add-to-list 'load-path "~/.emacs.d/elpa/kconfig-eldoc/") ; Adjust the path as needed
+    (require 'kconfig-eldoc)
+    #+end_src
+* Usage
+After installing and requiring the package, =kconfig-eldoc= will automatically activate in =c-mode= buffers when =eldoc-mode= is enabled.  To enable =eldoc-mode= globally, add the following to your Emacs configuration:
+#+begin_src emacs-lisp
+  (global-eldoc-mode 1)
+#+end_src
+Now, when you type a Kconfig symbol in a C buffer (e.g., =CONFIG_FEATURE_XYZ=), the value of that symbol from your project's =.config= file will be displayed in the minibuffer.
+* Customization
+If the default method for =kconfig-eldoc-config-file= to locate your project's Kconfig configuration file doesn't work for you, you can customize its behavior by advising the function.
