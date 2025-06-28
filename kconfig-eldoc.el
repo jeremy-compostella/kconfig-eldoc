@@ -40,6 +40,11 @@
 
 (require 'magit)
 
+(defcustom kconfig-eldoc-supported-modes
+  '(c-mode makefile-mode asm-mode kconfig-mode cscope-mode)
+  "List of major modes where `kconfig-eldoc-mode' is active."
+  :type '(repeat symbol))
+
 (defun kconfig-at-point ()
   "Return the Kconfig symbol at point, or nil.
 
@@ -126,8 +131,11 @@ the relevant modes."
 		(remove-hook var hook local))))
     (dolist (buffer (buffer-list))
       (with-current-buffer buffer
-	(when (memq major-mode '(c-mode makefile-mode asm-mode))
+	(when (memq major-mode kconfig-eldoc-supported-modes)
 	  (action 'eldoc-documentation-functions #'kconfig-eldoc t))))
-    (action 'c-mode-hook #'kconfig-eldoc-c-mode-hook nil)))
+    (dolist (mode kconfig-eldoc-supported-modes)
+      (let* ((hook-name (concat (symbol-name mode) "-hook"))
+	     (hook (intern hook-name)))
+	(action hook #'kconfig-eldoc-c-mode-hook nil)))))
 
 (provide 'kconfig-eldoc)
