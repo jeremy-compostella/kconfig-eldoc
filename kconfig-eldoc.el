@@ -113,7 +113,7 @@ caches the buffer for future use. "
 			 :face 'font-lock-variable-name-face)
 	      value)))))))
 
-(defun kconfig-c-mode-hook ()
+(defun kconfig-eldoc-c-mode-hook ()
   (add-hook 'eldoc-documentation-functions #'kconfig-eldoc nil t))
 
 (define-minor-mode kconfig-eldoc-mode
