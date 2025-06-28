@@ -81,9 +81,25 @@ nil."
 	      value)))))))
 
 (defun kconfig-c-mode-hook ()
-  (add-hook 'eldoc-documentation-functions #'kconfig-eldoc))
+  (add-hook 'eldoc-documentation-functions #'kconfig-eldoc nil t))
 
-(eval-after-load 'c-mode
-  '(add-hook 'c-mode-hook #'kconfig-c-mode-hook))
+(define-minor-mode kconfig-eldoc-mode
+  "Toggle Kconfig eldoc support.
+
+When enabled, this minor mode provides eldoc information for
+Kconfig symbols in C, Makefiles, and Assembly code. It adds
+`kconfig-eldoc' to the `eldoc-documentation-functions' hook in
+the relevant modes."
+  :init-value nil
+  :global t
+  (cl-flet ((action (var hook local)
+	      (if kconfig-eldoc-mode
+		  (add-hook var hook nil local)
+		(remove-hook var hook local))))
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+	(when (memq major-mode '(c-mode makefile-mode asm-mode))
+	  (action 'eldoc-documentation-functions #'kconfig-eldoc t))))
+    (action 'c-mode-hook #'kconfig-eldoc-c-mode-hook nil)))
 
 (provide 'kconfig-eldoc)
