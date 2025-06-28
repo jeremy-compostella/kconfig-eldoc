@@ -64,12 +64,40 @@ nil."
       (when (file-exists-p file)
 	file))))
 
+(defvar kconfig-eldoc-buffer-cache nil
+  "Cache for the Kconfig buffers.")
+
+(defun kconfig-eldoc-get-buffer ()
+  "Retrieve the buffer associated with the Kconfig file located in DIR.
+
+This function checks the cache `kconfig-eldoc-buffer-cache' for
+an existing buffer corresponding to the directory DIR. If found,
+it returns the cached buffer. If not, it attempts to locate the
+Kconfig file using `kconfig-eldoc-config-file', opens it, and
+caches the buffer for future use. "
+  (if-let ((dir default-directory)
+	   (item (find dir kconfig-eldoc-buffer-cache
+		       :test (lambda (x y)
+			       (when (string-prefix-p (car y) x)
+				 (or (not (cdr y))
+				     (buffer-live-p (cdr y))))))))
+      (cdr item)
+    (when-let ((top-level (magit-toplevel)))
+      (setf dir top-level))
+    (let ((file (kconfig-eldoc-config-file))
+	  (elem (cons dir nil)))
+      (when file
+	(let* ((buffer (find-file-noselect file)))
+	  (setcdr elem buffer)))
+      (add-to-list 'kconfig-eldoc-buffer-cache elem)
+      (cdr elem))))
+
 (defun kconfig-eldoc (callback &rest _ignored)
   "Provide eldoc information for Kconfig symbols found in C code."
   (interactive)
   (when-let ((kconfig (kconfig-at-point)))
-    (when-let ((file (kconfig-eldoc-config-file)))
-      (with-current-buffer (find-file-noselect file)
+    (when-let ((buffer (kconfig-eldoc-get-buffer)))
+      (with-current-buffer buffer
 	(goto-char (point-min))
 	(unless (string-prefix-p "CONFIG_" kconfig)
 	  (setf kconfig (concat "CONFIG_" kconfig)))
