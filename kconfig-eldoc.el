@@ -54,11 +54,12 @@ helps avoid identifying parts of code which shouldn't be Kconfig
 symbols."
   (when-let ((symbol (thing-at-point 'symbol)))
     (let ((face (get-text-property 0 'face symbol)))
-      (when (= (string-match "[a-zA-Z0-9-_]+" symbol) 0)
-	(when (or (not face)
-		  (eq face 'font-lock-variable-name-face)
-		  (and (listp face) (memq 'font-lock-variable-name-face face)))
-	  symbol)))))
+      (when-let ((index (string-match "[a-zA-Z0-9-_]+" symbol)))
+	(when (= index 0)
+	  (when (or (not face)
+		    (eq face 'font-lock-variable-name-face)
+		    (and (listp face) (memq 'font-lock-variable-name-face face)))
+	    symbol))))))
 
 (defun kconfig-eldoc-config-file ()
   "Return the path to the \"kconfig\" file.
